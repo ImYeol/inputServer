@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.Set;
 import java.util.UUID;
 import android.app.Service;
@@ -144,18 +146,23 @@ public class BltService extends Service {
 			int bufferSize = 512;
 			byte[] buffer = new byte[bufferSize];
 			try {
-				
 				bytesRead = -1;
 				Log.d(TAG, "ready to receive");
 				while ((bytesRead = reader.read(buffer)) > 0) {
 					Log.d(TAG, "bytesRead=" + bytesRead);
 				}
 				Log.d(TAG, "receive success");
+				float[] floatBuffer=ByteBuffer.wrap(buffer).asFloatBuffer().array();
+				mCallback.OnTouchEvent(floatBuffer[0], floatBuffer[1]);
 			} catch (IOException e) {
 				Log.d(TAG, "error to get img");
 				e.printStackTrace();
 			}
-
+			catch(Exception e){
+				Log.d(TAG, "error to get img");
+				e.printStackTrace();
+			}
+			
 			try {
 				reader.close();
 				// BuffInputStream.close();
@@ -168,25 +175,6 @@ public class BltService extends Service {
 		}
 	}
 	
-	protected static class EventHandler extends Handler {
-		private WeakReference<VoiceListenerService> mtarget;
-
-		@Override
-		public void handleMessage(Message msg) {
-			final VoiceListenerService target = mtarget.get();
-
-			switch (msg.what) {
-			case MSG_RECOGNIZER_START_LISTENING:
-
-				if (!target.mIsListening) {
-					target.mSpeechRecognizer
-							.startListening(target.mSpeechRecognizerIntent);
-					target.mIsListening = true;
-			//		Log.d(tag, "message start listening"); //$NON-NLS-1$
-				}
-				break;
-			}
-		}
-	}
+	private Handler EventHandler =new Handler();
 
 }
