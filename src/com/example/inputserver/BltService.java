@@ -3,6 +3,7 @@ package com.example.inputserver;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,6 +12,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.Set;
 import java.util.UUID;
+
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -32,7 +34,7 @@ import android.widget.Toast;
 
 public class BltService extends Service {
 
-	public final static String TAG = "BltService_Server";
+	public final static String TAG = "InputTest";
 	public static final int REQUEST_TO_ENABLE_BT = 100;
 	private BluetoothAdapter mBluetoothAdapter;
 	private UUID MY_UUID = UUID
@@ -126,12 +128,14 @@ public class BltService extends Service {
 		private Handler h;
 		private InputStream reader;
 		private BufferedWriter writer;
+		private DataInputStream in;
 
 		public ConnectedThread(BluetoothSocket socket) {
 			mSocket = socket;
 			InputStream tmp = null;
 			try {
 				tmp = socket.getInputStream();
+				in=new DataInputStream(tmp);
 				// reader = new BufferedReader(new
 				// InputStreamReader(socket.getInputStream()));
 				// writer = new BufferedWriter(new
@@ -143,34 +147,31 @@ public class BltService extends Service {
 		}
 
 		public void run() {
-			int bufferSize = 512;
-			byte[] buffer = new byte[bufferSize];
-			try {
-				bytesRead = -1;
-				Log.d(TAG, "ready to receive");
-				while ((bytesRead = reader.read(buffer)) > 0) {
-					Log.d(TAG, "bytesRead=" + bytesRead);
+			int i=0;
+			float x,y;
+			while(true)
+			{
+				try{
+				while(in.available()>0){
+					
+						i=in.readInt();
+						x=in.readFloat();
+						y=in.readFloat();
+						Log.d(TAG, "x:"+x+"y:"+y);
 				}
-				Log.d(TAG, "receive success");
-				float[] floatBuffer=ByteBuffer.wrap(buffer).asFloatBuffer().array();
-				mCallback.OnTouchEvent(floatBuffer[0], floatBuffer[1]);
-			} catch (IOException e) {
-				Log.d(TAG, "error to get img");
-				e.printStackTrace();
-			}
-			catch(Exception e){
-				Log.d(TAG, "error to get img");
-				e.printStackTrace();
-			}
-			
-			try {
-				reader.close();
-				// BuffInputStream.close();
-				if (mSocket.isConnected())
-					mSocket.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				}catch(Exception e)
+				{
+					e.printStackTrace();
+					try {
+						reader.close();
+						// BuffInputStream.close();
+						if (mSocket.isConnected())
+							mSocket.close();
+					} catch (IOException ex) {
+						// TODO Auto-generated catch block
+						ex.printStackTrace();
+					}
+				}
 			}
 		}
 	}

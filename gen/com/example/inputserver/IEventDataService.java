@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: /home/yeol/workspace/InputServer/src/com/example/inputserver/IEventDataService.aidl
+ * Original file: /home/gyl115/InputTest/InputTest_/src/com/example/inputserver/IEventDataService.aidl
  */
 package com.example.inputserver;
 public interface IEventDataService extends android.os.IInterface

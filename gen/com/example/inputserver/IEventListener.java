@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: /home/yeol/workspace/InputServer/src/com/example/inputserver/IEventListener.aidl
+ * Original file: /home/gyl115/InputTest/InputTest_/src/com/example/inputserver/IEventListener.aidl
  */
 package com.example.inputserver;
 public interface IEventListener extends android.os.IInterface
