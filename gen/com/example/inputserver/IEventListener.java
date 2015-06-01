@@ -53,6 +53,17 @@ this.OnTouchEvent(_arg0, _arg1);
 reply.writeNoException();
 return true;
 }
+case TRANSACTION_getInt:
+{
+data.enforceInterface(DESCRIPTOR);
+int _arg0;
+_arg0 = data.readInt();
+int _arg1;
+_arg1 = data.readInt();
+this.getInt(_arg0, _arg1);
+reply.writeNoException();
+return true;
+}
 }
 return super.onTransact(code, data, reply, flags);
 }
@@ -87,8 +98,26 @@ _reply.recycle();
 _data.recycle();
 }
 }
+@Override public void getInt(int x, int y) throws android.os.RemoteException
+{
+android.os.Parcel _data = android.os.Parcel.obtain();
+android.os.Parcel _reply = android.os.Parcel.obtain();
+try {
+_data.writeInterfaceToken(DESCRIPTOR);
+_data.writeInt(x);
+_data.writeInt(y);
+mRemote.transact(Stub.TRANSACTION_getInt, _data, _reply, 0);
+_reply.readException();
+}
+finally {
+_reply.recycle();
+_data.recycle();
+}
+}
 }
 static final int TRANSACTION_OnTouchEvent = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
+static final int TRANSACTION_getInt = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);
 }
 public void OnTouchEvent(float x, float y) throws android.os.RemoteException;
+public void getInt(int x, int y) throws android.os.RemoteException;
 }

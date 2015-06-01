@@ -34,7 +34,7 @@ import android.widget.Toast;
 
 public class BltService extends Service {
 
-	public final static String TAG = "InputTest";
+	public final static String TAG = "InputTest/blt";
 	public static final int REQUEST_TO_ENABLE_BT = 100;
 	private BluetoothAdapter mBluetoothAdapter;
 	private UUID MY_UUID = UUID
@@ -66,6 +66,7 @@ public class BltService extends Service {
 		// TODO Auto-generated method stub
 		super.onCreate();
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+		Log.d(TAG, "blt Service onCreate");
 		if (mBluetoothAdapter == null) {
 			Log.d(TAG, "device does not support bluetooth");
 			return;
@@ -141,7 +142,7 @@ public class BltService extends Service {
 				// writer = new BufferedWriter(new
 				// OutputStreamWriter(socket.getOutputStream()));
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.d(TAG, e.getMessage());
 			}
 			reader = tmp;
 		}
@@ -149,6 +150,21 @@ public class BltService extends Service {
 		public void run() {
 			int i=0;
 			float x,y;
+			byte[] buffer=new byte[100];
+		/*	try {
+				while(reader.read(buffer) > 0)
+				{
+					Log.d(TAG, "data:"+buffer[0]+" "+buffer[1]);
+					mCallback.getInt(buffer[0], buffer[1]);
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				Log.d(TAG, e.getMessage());
+			} catch(RemoteException ex)
+			{
+				Log.d(TAG, ex.getMessage());
+			}
+			*/
 			while(true)
 			{
 				try{
@@ -158,6 +174,7 @@ public class BltService extends Service {
 						x=in.readFloat();
 						y=in.readFloat();
 						Log.d(TAG, "x:"+x+"y:"+y);
+						mCallback.OnTouchEvent(x, y);
 				}
 				}catch(Exception e)
 				{
@@ -173,6 +190,7 @@ public class BltService extends Service {
 					}
 				}
 			}
+			
 		}
 	}
 	
