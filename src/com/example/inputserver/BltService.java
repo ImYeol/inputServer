@@ -1,36 +1,23 @@
 package com.example.inputserver;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.ref.WeakReference;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.util.Set;
 import java.util.UUID;
 
+import android.app.Instrumentation;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Bitmap.CompressFormat;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
-import android.widget.Toast;
+import android.view.MotionEvent;
 
 public class BltService extends Service {
 
@@ -43,6 +30,9 @@ public class BltService extends Service {
 	private BluetoothServerSocket mServerSocket;
 	private final IBinder mBinder=new EventDataBinder();
 	private IEventListener mCallback;
+	private Instrumentation mInstumentation;
+	
+	private int IsDown=0;
 	
 	public class EventDataBinder extends IEventDataService.Stub {
 
@@ -65,6 +55,7 @@ public class BltService extends Service {
 	public void onCreate() {
 		// TODO Auto-generated method stub
 		super.onCreate();
+		mInstumentation=new Instrumentation();
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		Log.d(TAG, "blt Service onCreate");
 		if (mBluetoothAdapter == null) {
@@ -82,7 +73,6 @@ public class BltService extends Service {
 			}
 		}
 	}
-
 
 	/*
 	 * @Override protected void onDestroy() { // TODO Auto-generated method stub
@@ -130,6 +120,7 @@ public class BltService extends Service {
 		private InputStream reader;
 		private BufferedWriter writer;
 		private DataInputStream in;
+		private long downTime=0;
 
 		public ConnectedThread(BluetoothSocket socket) {
 			mSocket = socket;
@@ -168,32 +159,67 @@ public class BltService extends Service {
 			while(true)
 			{
 				try{
-				while(in.available()>0){
+				while((i=in.readInt())>=0){
 					
-						i=in.readInt();
+						//i=in.readInt();
 						x=in.readFloat();
 						y=in.readFloat();
 						Log.d(TAG, "x:"+x+"y:"+y);
-						mCallback.OnTouchEvent(x, y);
+						//mCallback.OnTouchEvent(x, y);
+						//long downTime = SystemClock.uptimeMillis();
+						MotionEvent event=null;
+						if(i==0)
+						{
+							downTime = SystemClock.uptimeMillis();
+							long eventTime = SystemClock.uptimeMillis();
+							event = MotionEvent.obtain(downTime,eventTime,MotionEvent.ACTION_DOWN, x,y, 0);
+						}
+						else if(i==1)
+						{
+							long eventTime = SystemClock.uptimeMillis();
+							event = MotionEvent.obtain(downTime,eventTime,MotionEvent.ACTION_MOVE, x,y, 0);
+						}
+						else if(i==2)
+						{
+							long eventTime = SystemClock.uptimeMillis();
+							event = MotionEvent.obtain(downTime,eventTime,MotionEvent.ACTION_UP, x,y, 0);
+						}
+						mInstumentation.sendPointerSync(event);
+						//mInstumentation.sendPointerSync(up_event);
+						//mInstumentation.waitForIdleSync();
 				}
 				}catch(Exception e)
 				{
 					e.printStackTrace();
-					try {
+					Log.d(TAG, "run exception e: "+e.getMessage());
+					mInstumentation.waitForIdleSync();
+					/*try {
 						reader.close();
-						// BuffInputStream.close();
 						if (mSocket.isConnected())
 							mSocket.close();
 					} catch (IOException ex) {
 						// TODO Auto-generated catch block
-						ex.printStackTrace();
-					}
+						Log.d(TAG, "run exception2 ex: "+ex.getMessage());
+					//	break;
+					}*/
+					
 				}
 			}
 			
 		}
 	}
-	
+	@Override
+	public boolean onUnbind(Intent intent) {
+		// TODO Auto-generated method stub
+		Log.d(TAG, "service onUnbind");
+		return super.onUnbind(intent);
+	}
+	@Override
+	public void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		Log.d(TAG, "service OnDestroy");
+	}
 	private Handler EventHandler =new Handler();
 
 }

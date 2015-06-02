@@ -1,33 +1,26 @@
 package com.example.inputserver;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Set;
 import java.util.UUID;
+
 import android.app.Activity;
+import android.app.Instrumentation;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
-import android.widget.Toast;
+import android.view.MotionEvent;
 
 
 public class MainActivity extends Activity {
@@ -40,12 +33,13 @@ public class MainActivity extends Activity {
 			.fromString("D04E3068-E15B-4482-8306-4CABFA1726E7");
 	private final static String CBT_SERVER_DEVICE_NAME = "IM-T100K";
 	private BluetoothServerSocket mServerSocket;
+	private Instrumentation mInstrumentation;
 	private IEventListener mCallback=new IEventListener.Stub() {
 		
 		@Override
 		public void OnTouchEvent(float x, float y) throws RemoteException {
 			// TODO Auto-generated method stub
-			MainActivity.this.OnTouchEvent(x,y);
+		//	MainActivity.this.OnTouchEvent(x,y);
 		}
 
 		@Override
@@ -84,6 +78,7 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		mInstrumentation=new Instrumentation();
 	/*	mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (mBluetoothAdapter == null) {
 			Log.d(TAG, "device does not support bluetooth");
@@ -209,13 +204,26 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
-		super.onDestroy();
+		Log.d(TAG, "onDestroy");
 		unbindService(mConnection);
 		stopService(new Intent(this,BltService.class));
+		super.onDestroy();
+	}
+/*	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		// TODO Auto-generated method stub
+		super.onTouchEvent(event);
+		Log.d(TAG, "real onTouchEvent: x "+event.getX()+" y: "+event.getY());
+		return true;
 	}
 	protected void OnTouchEvent(float x, float y) {
 		// TODO Auto-generated method stub
-		Log.d(TAG, "OnTouchEvent : "+x+" "+y);
-	}
+/*		long downTime = SystemClock.uptimeMillis();
+		long eventTime = SystemClock.uptimeMillis();
+		   MotionEvent event = MotionEvent.obtain(downTime, eventTime,
+		   MotionEvent.ACTION_DOWN, x,y, 0);
+		   mInstrumentation.sendPointerSync(event);
+		//Log.d(TAG, "OnTouchEvent : "+x+" "+y);
+	}*/
 	
 }
